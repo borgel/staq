@@ -10,7 +10,10 @@
    - Highlight accepted answer
 
 # Near Future
-- Optional API/application key
+- User config .file
+   - Make it JSON so we can reuse the parser
+   - Optional API/application key
+   - Default sites to search
 - Select other Stack Exchange sites
 - Search multiple Stack Exchange sites
 - Render pretty questions/answers
