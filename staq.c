@@ -21,9 +21,8 @@ int main(int argc, char* argv[]) {
 
    puts("Start");
 
-   //TODO parse input flags
-   // can we run getopt until it finishes, then take whatever's left as
-   // if its the query string and cat it together?
+   // run getopt until it finishes, then take whatever's left as
+   // if its the user's query string and cat it together
    int c;
    while((c = getopt(argc, argv, "h")) != -1) {
       switch(c) {
@@ -43,27 +42,29 @@ int main(int argc, char* argv[]) {
       exit(0);
    }
 
-   // buffer to hold query string in
+   // glom together everything left in argv to be the user's query string
    char* queryString = malloc(strlen(argv[1]));
-
    for(int i = 0; i < argc; i++) {
-      printf("%s ", argv[i]);
-      // realloc
-      // strcat
+      queryString = realloc(queryString, strlen(queryString) + strlen(argv[i]) + 2);
+
+      queryString = strcat(queryString, argv[i]);
+      queryString = strcat(queryString, " ");
    }
-   puts("");
+   printf("total line [%s]\n", queryString);
 
    // setup our stack exchange lib
    SEInit();
 
    // run the query, as specifid by the user
    SEQuestion* questions = NULL;
-   res = SEEasyFindQuestions(&questions, "c static type");
+   res = SEEasyFindQuestions(&questions, queryString);
    if(res < 0) {
       //error, compare to SEError enum
       fprintf(stderr, "Query failed. Code %d\n", res);
       //exit(-1);
    }
+
+   free(queryString);
 
    printf("M null? %p\n", questions);
    printf("M q0 id = %d\n", questions[0].questionId);
