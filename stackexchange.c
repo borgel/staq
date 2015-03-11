@@ -8,9 +8,6 @@
 #include "se_query_builder.h"
 #include "stackexchange.h"
 
-// temp file naming scheme
-static char TEMP_FILE_FORMAT[] = "/tmp/staq-working-XXXX";
-
 // the shared CURL handle
 static int g_curl = 0;
 
@@ -135,14 +132,7 @@ static SEError SEQueryAdvanced(json_t** json, SEStructuredQuery* query, SEQueryO
 
    *json = NULL;
 
-   // instead of writing the curl response into memory, spool it to a temp file
-   int cfd = mkstemp(TEMP_FILE_FORMAT);
-   if(cfd == -1) {
-      perror("opening the temp file");
-      return SE_ERROR;
-   }
-
-   FILE* cfile = fdopen(cfd, "w+");
+   FILE* cfile = tmpfile();
    if(!cfile) {
       perror("opening the temp file");
       return SE_ERROR;
@@ -178,8 +168,6 @@ static SEError SEQueryAdvanced(json_t** json, SEStructuredQuery* query, SEQueryO
 
    // we don't need this curl session anymore
    curl_easy_cleanup(curl);
-
-   // TODO unlink temp file
 
    if(!*json) {
       fprintf(stderr, "error: on line %d: %s\n", jerr.line, jerr.text);
