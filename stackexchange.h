@@ -16,13 +16,12 @@ typedef struct {
    enum SESite site;
 } SEQueryOptions;
 
-//FIXME this negative thing is crappy. find a better way
 typedef enum {
-   SE_OK          = 0,
-   SE_ERROR       = -1,
-   SE_BAD_PARAM   = -2,
-   SE_CURL_ERROR  = -3,
-   SE_JSON_ERROR  = -4
+   SE_OK = 0,
+   SE_ERROR,
+   SE_BAD_PARAM,
+   SE_CURL_ERROR,
+   SE_JSON_ERROR
 } SEError;
 
 // Types for holding results
@@ -90,22 +89,22 @@ typedef struct {
 /**
  * query for all questions with answers pertaining to the users query.
  * Takes:
- *    pointer to array of filled questions to receive
+ *    pointer to array of pointers to filled questions to receive
  *    pointer to error type (can be null)
  *    query string
  * Returns:
- *    >= 0: number of questions found
- *    < 0: Error (see error type)
+ *    SE_OK on no error
+ *    Error status otherwise
  */
-int SEEasyFindQuestions(SEQuestion** questions, char* query);
-int SEFindQuestions(SEQuestion** questions, char* query, SEQueryOptions* seqo);
+SEError SEEasyFindQuestions(SEQuestion*** questions, char* query);
+SEError SEFindQuestions(SEQuestion*** questions, char* query, SEQueryOptions* seqo);
 
 /**
  * Free an array of questions
  * FIXME change this API to consume the question memory too? We are the ones
  * who allocate them after all
  */
-void SEFreeQuestions(SEQuestion** questions);
+void SEFreeQuestions(SEQuestion*** questions);
 
 
 // Functions for setup and teardown

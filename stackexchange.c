@@ -178,11 +178,11 @@ static SEError SEQueryAdvanced(json_t** json, SEStructuredQuery* query, SEQueryO
 }
 
 
-int SEEasyFindQuestions(SEQuestion** questions, char* query) {
+SEError SEEasyFindQuestions(SEQuestion*** questions, char* query) {
    return SEFindQuestions(questions, query, NULL);
 }
 
-int SEFindQuestions(SEQuestion** questions, char* humanQueryString, SEQueryOptions* seqo) {
+SEError SEFindQuestions(SEQuestion*** questions, char* humanQueryString, SEQueryOptions* seqo) {
    SEError res;
    SEStructuredQuery stq;
    json_t* root = NULL;
@@ -231,20 +231,27 @@ int SEFindQuestions(SEQuestion** questions, char* humanQueryString, SEQueryOptio
 
    int numQuestions = json_array_size(jquestions);
    printf("%d questions\n", numQuestions);
-   *questions = (SEQuestion*)malloc(numQuestions * sizeof(SEQuestion));
+   // allocate an extra slot for the terminator
+   *questions = (SEQuestion**)malloc(1 + numQuestions * sizeof(SEQuestion*));
 
    json_t* jcur;
    for(int i = 0; i < numQuestions; i++) {
       jcur = json_array_get(jquestions, i);
 
+      (*questions)[i] = calloc(1, sizeof(SEQuestion));
+
+
       // fill in this question object (including all its answers)
-      if(SEPopulateQuestion(&(*questions)[i], jcur) != SE_OK) {
+      if(SEPopulateQuestion((*questions)[i], jcur) != SE_OK) {
          fprintf(stderr, "error: populating question %d\n", i);
          json_decref(root);
 
          return SE_ERROR;
       }
    }
+
+   // null the terminating array member
+   (*questions)[numQuestions + 1] = NULL;
 
    // free the json
    json_decref(root);
@@ -253,7 +260,7 @@ int SEFindQuestions(SEQuestion** questions, char* humanQueryString, SEQueryOptio
 }
 
 // TODO fill this in
-void SEFreeQuestions(SEQuestion** questions) {
+void SEFreeQuestions(SEQuestion*** questions) {
    // free all allocated strings inside each one?
    // free all the answer objects entirely
    // free the questions array itself

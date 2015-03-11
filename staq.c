@@ -14,11 +14,10 @@
 
 #include "stackexchange.h"
 
-// TODO usage msg
 #define USAGE  "Usage: staq [-h] <a query to search for>"
 
 int main(int argc, char* argv[]) {
-   int res;
+   SEError err;
 
    puts("Start");
 
@@ -57,19 +56,19 @@ int main(int argc, char* argv[]) {
    SEInit();
 
    // run the query, as specifid by the user
-   SEQuestion* questions = NULL;
-   res = SEEasyFindQuestions(&questions, queryString);
-   if(res < 0) {
+   SEQuestion** questions = NULL;
+   err = SEEasyFindQuestions(&questions, queryString);
+   if(err != SE_OK) {
       //error, compare to SEError enum
-      fprintf(stderr, "Query failed. Code %d\n", res);
+      fprintf(stderr, "Query failed. Code %d\n", err);
       //exit(-1);
    }
 
    free(queryString);
 
    printf("M null? %p\n", questions);
-   printf("M q0 id = %d\n", questions[0].questionId);
-   printf("M q0a0 id = %d\n", questions[0].answers[0].answerId);
+   printf("M q0 id = %d\n", questions[0]->questionId);
+   printf("M q0a0 id = %d\n", questions[0]->answers[0].answerId);
 
    //TODO for each question. print it, then print each answer
 
