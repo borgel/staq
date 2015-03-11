@@ -13,14 +13,17 @@ When programming, often I use two tools:
 
 It would be ideal to fulfull both of these purposes using a purely console-based interface.
 
-Inspired by `tig`, the excellent git log browser.
+Inspired by `tig`, an excellent git log browser.
 
 # Installation
 You will need...
 - libcurl
-- jansson (a C JSON deserialization lib)
+- jansson (a C JSON lib)
 
-# Sample Stack Exchange Queries
+# Comments
+The Stack Exchange interface code is written to be more or less standalone, so it could be easily integrated into other projects. The curses display code... not so much. Ultimately I decided it was application-specific enough to not bother generalizing.
+
+## Some Sample Stack Exchange Queries
 
 'c string concatenation', sorted by descending relevance. Filter showing body and body in markdown of all questions.
 ```

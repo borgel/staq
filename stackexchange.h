@@ -6,6 +6,7 @@
 #define __STACK_EXCHANGE_H__
 
 // Types for passing options and config around
+// TODO use these
 enum SESite {
    StackOverflow,
    ServerFault
@@ -15,7 +16,7 @@ typedef struct {
    enum SESite site;
 } SEQueryOptions;
 
-//FIXME this is crappy. find a better way
+//FIXME this negative thing is crappy. find a better way
 typedef enum {
    SE_OK          = 0,
    SE_ERROR       = -1,
@@ -79,13 +80,6 @@ typedef struct {
    SEAnswer* answers;
 } SEQuestion;
 
-// FIXME do we need this?
-// Root result type. NOT SPECIFICALLY questions and answers!
-typedef struct {
-   // TODO uhh, other metadata?
-   int a;
-} SEQueryResults;
-
 // FIXME TODO take query params in here too I guess
 typedef struct {
    // TODO needs a 'freed' flag?
@@ -108,7 +102,7 @@ int SEFindQuestions(SEQuestion** questions, char* query, SEQueryOptions* seqo);
 
 /**
  * Free an array of questions
- * FIXME change this API to consume the questions too? We are the ones
+ * FIXME change this API to consume the question memory too? We are the ones
  * who allocate them after all
  */
 void SEFreeQuestions(SEQuestion** questions);

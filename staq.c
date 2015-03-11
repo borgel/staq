@@ -76,6 +76,6 @@ int main(int argc, char* argv[]) {
    // TODO draw GUI and display results
 
    SEFreeQuestions(&questions);
-   //SECleanup();
+   SECleanup();
    return 0;
 }

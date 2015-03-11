@@ -5,6 +5,8 @@
    - Highlight accepted answer
 - Remove either body or body_markdown from API filter
 - real help msg
+- SEQuestion free fxn
+- SEFreeQuery
 
 # Near Future
 - User config .file
