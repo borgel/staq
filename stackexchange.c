@@ -12,25 +12,24 @@
 static char TEMP_FILE_FORMAT[] = "/tmp/staq-working-XXXX";
 
 // the shared CURL handle
-// FIXME rename to g_
-static CURL *curl = NULL;
+static CURL *g_curl = NULL;
 
 void SEInit() {
-   if(!curl) {
-      curl = curl_easy_init();
+   if(!g_curl) {
+      g_curl = curl_easy_init();
    }
 
    // configure some CURL options
    // follow redirects
-   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+   curl_easy_setopt(g_curl, CURLOPT_FOLLOWLOCATION, 1L);
 
    // stack exchange gives us gzipped content, so ask curl to gunzip for us
-   curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip");
+   curl_easy_setopt(g_curl, CURLOPT_ACCEPT_ENCODING, "gzip");
 }
 
 void SECleanup() {
-   if(curl) {
-      curl_easy_cleanup(curl);
+   if(g_curl) {
+      curl_easy_cleanup(g_curl);
    }
 }
 
@@ -135,7 +134,7 @@ static SEError SEPopulateQuestion(SEQuestion* question, json_t* json) {
 static SEError SEQueryAdvanced(json_t** json, SEStructuredQuery* query, SEQueryOptions* seqo) {
    CURLcode res;
 
-   if(!query || !curl) {
+   if(!query || !g_curl) {
       return SE_BAD_PARAM;
    }
 
@@ -155,13 +154,13 @@ static SEError SEQueryAdvanced(json_t** json, SEStructuredQuery* query, SEQueryO
    }
 
    // set the url
-   curl_easy_setopt(curl, CURLOPT_URL, query->url);
+   curl_easy_setopt(g_curl, CURLOPT_URL, query->url);
 
    // ask curl to write to our file
-   curl_easy_setopt(curl, CURLOPT_WRITEDATA, cfile);
+   curl_easy_setopt(g_curl, CURLOPT_WRITEDATA, cfile);
 
    /* Perform the request, res will get the return code */ 
-   res = curl_easy_perform(curl);
+   res = curl_easy_perform(g_curl);
 
    /* Check for errors */ 
    if(res != CURLE_OK) {
@@ -178,7 +177,7 @@ static SEError SEQueryAdvanced(json_t** json, SEStructuredQuery* query, SEQueryO
    *json = json_loadf(cfile, 0, &jerr);
 
    // no matter what, we don't need this curl session anymore
-   curl_easy_cleanup(curl);
+   curl_easy_cleanup(g_curl);
 
    // TODO unlink temp file
 
@@ -264,10 +263,6 @@ int SEFindQuestions(SEQuestion** questions, char* humanQueryString, SEQueryOptio
 
    return SE_OK;
 }
-
-// FIXME TODO function to get all answers for a question
-// uhh, looks like they come for free from the advanced search API if you
-// ask it the right way.
 
 // TODO fill this in
 void SEFreeQuestions(SEQuestion** questions) {

@@ -15,6 +15,7 @@
 #include "stackexchange.h"
 
 // TODO usage msg
+#define USAGE  "Usage: staq [-h] <a query to search for>"
 
 int main(int argc, char* argv[]) {
    int res;
@@ -28,7 +29,7 @@ int main(int argc, char* argv[]) {
       switch(c) {
          case 'h':
          default:
-            printf("help msg\n");
+            printf(USAGE "\n");
             exit(0);
       }
    }
@@ -38,7 +39,7 @@ int main(int argc, char* argv[]) {
    argv += optind;
 
    if(argc <= 0) {
-      printf("help msg\n");
+      printf(USAGE "\n");
       exit(0);
    }
 
@@ -69,9 +70,6 @@ int main(int argc, char* argv[]) {
    printf("M null? %p\n", questions);
    printf("M q0 id = %d\n", questions[0].questionId);
    printf("M q0a0 id = %d\n", questions[0].answers[0].answerId);
-
-   // TODO write a function to get all answers for a question
-   // Even better! the advanced search API will give you answers for free...
 
    //TODO for each question. print it, then print each answer
 
