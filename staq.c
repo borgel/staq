@@ -9,8 +9,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "stackexchange.h"
+
+// TODO usage msg
 
 int main(int argc, char* argv[]) {
    int res;
@@ -18,6 +22,36 @@ int main(int argc, char* argv[]) {
    puts("Start");
 
    //TODO parse input flags
+   // can we run getopt until it finishes, then take whatever's left as
+   // if its the query string and cat it together?
+   int c;
+   while((c = getopt(argc, argv, "h")) != -1) {
+      switch(c) {
+         case 'h':
+         default:
+            printf("help msg\n");
+            exit(0);
+      }
+   }
+
+   // increment argc and argv to get query string
+   argc -= optind;
+   argv += optind;
+
+   if(argc <= 0) {
+      printf("help msg\n");
+      exit(0);
+   }
+
+   // buffer to hold query string in
+   char* queryString = malloc(strlen(argv[1]));
+
+   for(int i = 0; i < argc; i++) {
+      printf("%s ", argv[i]);
+      // realloc
+      // strcat
+   }
+   puts("");
 
    // setup our stack exchange lib
    SEInit();
@@ -42,8 +76,7 @@ int main(int argc, char* argv[]) {
 
    // TODO draw GUI and display results
 
-   //SEFreeQuestions(questions);
-   //free(questions);
+   SEFreeQuestions(&questions);
    //SECleanup();
    return 0;
 }

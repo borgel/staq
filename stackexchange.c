@@ -270,7 +270,9 @@ int SEFindQuestions(SEQuestion** questions, char* humanQueryString, SEQueryOptio
 // ask it the right way.
 
 // TODO fill this in
-void SEFreeQuestions(SEQuestion* questions) {
-   // free all allocated strings inside each one
+void SEFreeQuestions(SEQuestion** questions) {
+   // free all allocated strings inside each one?
+   // free all the answer objects entirely
+   // free the questions array itself
 }
 

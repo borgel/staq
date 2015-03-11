@@ -111,7 +111,7 @@ int SEFindQuestions(SEQuestion** questions, char* query, SEQueryOptions* seqo);
  * FIXME change this API to consume the questions too? We are the ones
  * who allocate them after all
  */
-void SEFreeQuestions(SEQuestion* questions);
+void SEFreeQuestions(SEQuestion** questions);
 
 
 // Functions for setup and teardown

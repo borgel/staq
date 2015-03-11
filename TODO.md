@@ -8,6 +8,7 @@
    - Allow user to select question threads from search results to view
    - Display question and answers, sorted by rating
    - Highlight accepted answer
+- usage msg
 - Remove either body or body_markdown from API filter
 
 # Near Future
