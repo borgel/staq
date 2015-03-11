@@ -35,21 +35,96 @@ void SECleanup() {
 }
 
 /**
- * Assemble a single SEQuestion object from it's JSON counterpart
+ * Assemble a single answer from the JSON and add it to the question
  */
-static SEError SEPopulateQuestion(SEQuestion* question, json_t* json) {
-   if(!question || !json) {
+static SEError SEPopulateAnswer(SEAnswer* answer, json_t* json) {
+   if(!answer || !json) {
+      fprintf(stderr, "PopulateAnswer: bad params\n");
       return SE_ERROR;
    }
 
-   if(!json_is_object(json))
-   {
+   if(!json_is_object(json)){
       fprintf(stderr, "error: root is not an object\n");
       json_decref(json);
       return SE_JSON_ERROR;
    }
 
-   //TODO get all members
+   json_error_t jerror;
+   if(json_unpack_ex(json, &jerror, 0,
+            "{s:b s:i s:i s:i s?:i s:i s:s s:s}",
+            "is_accepted",          &answer->isAccepted,
+            "score",                &answer->score,
+            "last_activity_date",   &answer->dateLastActivity,
+            "creation_date",        &answer->dateCreation,
+            "last_edit_date",       &answer->dateLastEdit,
+            "answer_id",            &answer->answerId,
+            "body",                 &answer->body,
+            "body_markdown",        &answer->bodyMarkdown
+            )) {
+      fprintf(stderr, "error: on line %d: %s\n", jerror.line, jerror.text);
+      return SE_JSON_ERROR;
+   }
+   return SE_OK;
+}
+
+/**
+ * Assemble a single SEQuestion object from it's JSON counterpart
+ */
+static SEError SEPopulateQuestion(SEQuestion* question, json_t* json) {
+   if(!question || !json) {
+      fprintf(stderr, "PopulateQuestion: bad params\n");
+      return SE_ERROR;
+   }
+
+   if(!json_is_object(json)){
+      fprintf(stderr, "error: root is not an object\n");
+      json_decref(json);
+      return SE_JSON_ERROR;
+   }
+
+   json_error_t jerror;
+   if(json_unpack_ex(json, &jerror, 0,
+            "{s:i s:b s?:i s:i s:i s:i s:i s?:i s:s s:s s:s s:s}",
+            "question_id",          &question->questionId,
+            "is_answered",          &question->isAnswered,
+            "accepted_answer_id",   &question->acceptedAnswerId,
+            "answer_count",         &question->answerCount,
+            "score",                &question->score,
+            "last_activity_date",   &question->dateLastActivity,
+            "creation_date",        &question->dateCreation,
+            "last_edit_date",       &question->dateLastEdit,
+            "link",                 &question->url,
+            "title",                &question->title,
+            "body",                 &question->body,
+            "body_markdown",        &question->bodyMarkdown
+            )) {
+      fprintf(stderr, "error: on line %d: %s\n", jerror.line, jerror.text);
+      return SE_JSON_ERROR;
+   }
+
+   printf("old qid = %d\n", question->questionId);
+
+   json_t* janswers = json_object_get(json, "answers");
+   if(!janswers) {
+      fprintf(stderr, "error: couldn't get question's answer items\n");
+      json_decref(json);
+      return SE_JSON_ERROR;
+   }
+
+   int numAnswers = json_array_size(janswers);
+   printf("\t%d answers\n", numAnswers);
+   question->answers = (SEAnswer*)malloc(numAnswers * sizeof(SEAnswer));
+
+   json_t* jcur;
+   for(int i = 0; i < numAnswers; i++) {
+      jcur = json_array_get(janswers, i);
+
+      if(SEPopulateAnswer(&(question->answers[i]), jcur) != SE_OK) {
+         fprintf(stderr, "error: populating answer %d\n", i);
+         json_decref(jcur);
+         return SE_ERROR;
+      }
+   }
 
    return SE_OK;
 }
@@ -116,12 +191,11 @@ static SEError SEQueryAdvanced(json_t** json, SEStructuredQuery* query, SEQueryO
 }
 
 
-
-SEError SEEasyFindQuestions(SEQuestion* questions, char* query) {
+int SEEasyFindQuestions(SEQuestion** questions, char* query) {
    return SEFindQuestions(questions, query, NULL);
 }
 
-SEError SEFindQuestions(SEQuestion* questions, char* humanQueryString, SEQueryOptions* seqo) {
+int SEFindQuestions(SEQuestion** questions, char* humanQueryString, SEQueryOptions* seqo) {
    SEError res;
    SEStructuredQuery stq;
    json_t* root = NULL;
@@ -149,11 +223,10 @@ SEError SEFindQuestions(SEQuestion* questions, char* humanQueryString, SEQueryOp
 
    puts("converting json to our structs");
 
-   // TODO break this validation out?
+   // TODO break the basic validation out?
 
    // do some json validation
-   if(!json_is_object(root))
-   {
+   if(!json_is_object(root)) {
       fprintf(stderr, "error: root is not an object\n");
       json_decref(root);
       return SE_JSON_ERROR;
@@ -169,29 +242,32 @@ SEError SEFindQuestions(SEQuestion* questions, char* humanQueryString, SEQueryOp
 
    puts("before loop");
 
-   //TODO convert the json into SEQuestion struct arrays and such
    int numQuestions = json_array_size(jquestions);
-   questions = (SEQuestion*)malloc(numQuestions * sizeof(SEQuestion));
+   printf("%d questions\n", numQuestions);
+   *questions = (SEQuestion*)malloc(numQuestions * sizeof(SEQuestion));
 
    json_t* jcur;
-   for(int i = 0; i < json_array_size(jquestions); i++) {
+   for(int i = 0; i < numQuestions; i++) {
       jcur = json_array_get(jquestions, i);
 
-      // fill in this question object
-      SEPopulateQuestion(&questions[i], jcur);
+      // fill in this question object (including all its answers)
+      if(SEPopulateQuestion(&(*questions)[i], jcur) != SE_OK) {
+         fprintf(stderr, "error: populating question %d\n", i);
+         json_decref(root);
 
-      //jcur = json_object_get(jcur, "body");
-      //printf("\n\n>>>>%s\n", json_string_value(jcur));
+         return SE_ERROR;
+      }
    }
 
    // free the json
    json_decref(root);
 
-   return SE_ERROR;
+   return SE_OK;
 }
 
 // FIXME TODO function to get all answers for a question
-
+// uhh, looks like they come for free from the advanced search API if you
+// ask it the right way.
 
 // TODO fill this in
 void SEFreeQuestions(SEQuestion* questions) {

@@ -15,30 +15,43 @@ typedef struct {
    enum SESite site;
 } SEQueryOptions;
 
+//FIXME this is crappy. find a better way
 typedef enum {
-   SE_OK = 0,
-   SE_BAD_PARAM,
-   SE_CURL_ERROR,
-   SE_JSON_ERROR,
-   SE_ERROR
+   SE_OK          = 0,
+   SE_ERROR       = -1,
+   SE_BAD_PARAM   = -2,
+   SE_CURL_ERROR  = -3,
+   SE_JSON_ERROR  = -4
 } SEError;
 
 // Types for holding results
 
 // a single answer
 typedef struct {
-   int datePublished;
-   int dateEdited;
+   // TODO add owner struct/info?
+
+   int isAccepted;
+
+   int score;
+
+   int dateLastActivity;
+   int dateCreation;
+   int dateLastEdit;
+
+   int answerId;
 
    char* body;
+   char* bodyMarkdown;
 
    // other stuff
 } SEAnswer;
 
 // a single question
 typedef struct {
+   // TODO add owner struct/info?
+
    // the stack exchange ID of this question
-   long questionId;
+   int questionId;
 
    // is there an accepted answer?
    int isAnswered;
@@ -47,9 +60,12 @@ typedef struct {
    // the number of answers to this question
    int answerCount;
 
+   int score;
+
    // date things
-   long lastActivity;
-   long creationDate;
+   int dateLastActivity;
+   int dateCreation;
+   int dateLastEdit;
 
    char* title;
 
@@ -59,7 +75,7 @@ typedef struct {
    char* body;
    char* bodyMarkdown;
 
-   // the array of answer objects
+   // the array of answer objects for this question
    SEAnswer* answers;
 } SEQuestion;
 
@@ -78,10 +94,17 @@ typedef struct {
 
 
 /**
- * query for all questions pertaining to the users query
+ * query for all questions with answers pertaining to the users query.
+ * Takes:
+ *    pointer to array of filled questions to receive
+ *    pointer to error type (can be null)
+ *    query string
+ * Returns:
+ *    >= 0: number of questions found
+ *    < 0: Error (see error type)
  */
-SEError SEEasyFindQuestions(SEQuestion* questions, char* query);
-SEError SEFindQuestions(SEQuestion* questions, char* query, SEQueryOptions* seqo);
+int SEEasyFindQuestions(SEQuestion** questions, char* query);
+int SEFindQuestions(SEQuestion** questions, char* query, SEQueryOptions* seqo);
 
 /**
  * Free an array of questions

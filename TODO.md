@@ -1,13 +1,14 @@
 # MVP
-- Take a query string as arguments to the binary
+- Query strings actually as arguments to the binary from the cmdline (hardcoded now)
 - Interact with Stack Exchange API
    - Hard coded to Stack Overflow
    - Search for a string
-   - Browse individual questions and answers
+   - Get individual questions and their answers
 - UI
    - Allow user to select question threads from search results to view
    - Display question and answers, sorted by rating
    - Highlight accepted answer
+- Remove either body or body_markdown from API filter
 
 # Near Future
 - User config .file

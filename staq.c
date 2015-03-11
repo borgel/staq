@@ -13,9 +13,9 @@
 #include "stackexchange.h"
 
 int main(int argc, char* argv[]) {
-   SEError err;
+   int res;
 
-   puts("asdaa");
+   puts("Start");
 
    //TODO parse input flags
 
@@ -24,21 +24,26 @@ int main(int argc, char* argv[]) {
 
    // run the query, as specifid by the user
    SEQuestion* questions = NULL;
-   err = SEEasyFindQuestions(questions, "c static type");
-   if(err != SE_OK) {
-      fprintf(stderr, "Query failed. Code %d\n", err);
-      exit(-1);
+   res = SEEasyFindQuestions(&questions, "c static type");
+   if(res < 0) {
+      //error, compare to SEError enum
+      fprintf(stderr, "Query failed. Code %d\n", res);
+      //exit(-1);
    }
 
-   // TODO write a function to get all answers for a question
+   printf("M null? %p\n", questions);
+   printf("M q0 id = %d\n", questions[0].questionId);
+   printf("M q0a0 id = %d\n", questions[0].answers[0].answerId);
 
+   // TODO write a function to get all answers for a question
+   // Even better! the advanced search API will give you answers for free...
 
    //TODO for each question. print it, then print each answer
 
    // TODO draw GUI and display results
 
-   SEFreeQuestions(questions);
-   free(questions);
-   SECleanup();
+   //SEFreeQuestions(questions);
+   //free(questions);
+   //SECleanup();
    return 0;
 }
