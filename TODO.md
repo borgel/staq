@@ -1,5 +1,4 @@
 # MVP
-- SEFreeQuery
 - push pointer into SEQuestion type itself (need to make struct non-anon?)? Makes the API not so nasty. Could also typedef over it
 - UI
    - Allow user to select question threads from search results to view

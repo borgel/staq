@@ -56,5 +56,6 @@ SEError SEBuildSearchQuery(SEStructuredQuery* stq, char* humanString) {
 void SEFreeQuery(SEStructuredQuery* stq) {
    if(stq) {
       free(stq->url);
+      stq->url = NULL;
    }
 }

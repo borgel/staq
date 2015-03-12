@@ -87,7 +87,6 @@ typedef struct {
 
 // FIXME TODO take query params in here too I guess
 typedef struct {
-   // TODO needs a 'freed' flag?
    char* url;
 } SEStructuredQuery;
 

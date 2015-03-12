@@ -276,7 +276,8 @@ void SEFreeQuestionWithAnswers(SEQuestion* question) {
 }
 
 void SEFreeQuestions(SEQuestion*** questions) {
-   if(!questions) {
+   // ugh, this is ugly!
+   if(!questions || !*questions || **questions) {
       // not sure if this is an error or not, so don't report it
       return;
    }
