@@ -5,6 +5,8 @@
 #ifndef __STACK_EXCHANGE_H__
 #define __STACK_EXCHANGE_H__
 
+#include <jansson.h>
+
 // Types for passing options and config around
 // TODO use these
 enum SESite {
@@ -77,6 +79,10 @@ typedef struct {
 
    // the array of answer objects for this question
    SEAnswer* answers;
+
+   // handle to the jaon root for this object AND all its children! Free this
+   // to free all strings in the question and its children
+   json_t* jsonLocalRoot;
 } SEQuestion;
 
 // FIXME TODO take query params in here too I guess

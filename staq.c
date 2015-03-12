@@ -66,9 +66,16 @@ int main(int argc, char* argv[]) {
 
    free(queryString);
 
-   printf("M null? %p\n", questions);
+   printf("M addr? %p\n", questions);
+   printf("M* addr? %p\n", *questions);
    printf("M q0 id = %d\n", questions[0]->questionId);
    printf("M q0a0 id = %d\n", questions[0]->answers[0].answerId);
+   puts("");
+
+   SEQuestion** curq;
+   for(curq = questions; *curq; curq++) {
+      printf("q %p\n", *curq);
+   }
 
    //TODO for each question. print it, then print each answer
 

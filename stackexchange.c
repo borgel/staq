@@ -73,6 +73,10 @@ static SEError SEPopulateQuestion(SEQuestion* question, json_t* json) {
       return SE_JSON_ERROR;
    }
 
+   // take a deep copy of this JSON node and stash it
+   json = json_deep_copy(json);
+   question->jsonLocalRoot = json;
+
    json_error_t jerror;
    if(json_unpack_ex(json, &jerror, 0,
             "{s:i s:b s?:i s:i s:i s:i s:i s?:i s:s s:s s:s s:s}",
@@ -93,8 +97,6 @@ static SEError SEPopulateQuestion(SEQuestion* question, json_t* json) {
       return SE_JSON_ERROR;
    }
 
-   printf("old qid = %d\n", question->questionId);
-
    json_t* janswers = json_object_get(json, "answers");
    if(!janswers) {
       fprintf(stderr, "error: couldn't get question's answer items\n");
@@ -103,7 +105,6 @@ static SEError SEPopulateQuestion(SEQuestion* question, json_t* json) {
    }
 
    int numAnswers = json_array_size(janswers);
-   printf("\t%d answers\n", numAnswers);
    question->answers = (SEAnswer*)malloc(numAnswers * sizeof(SEAnswer));
 
    json_t* jcur;
@@ -240,6 +241,8 @@ SEError SEFindQuestions(SEQuestion*** questions, char* humanQueryString, SEQuery
 
       (*questions)[i] = calloc(1, sizeof(SEQuestion));
 
+      printf("p = %p\n", (*questions)[i]);
+      printf("assigned question %d/%d\n", i, numQuestions);
 
       // fill in this question object (including all its answers)
       if(SEPopulateQuestion((*questions)[i], jcur) != SE_OK) {
@@ -248,10 +251,13 @@ SEError SEFindQuestions(SEQuestion*** questions, char* humanQueryString, SEQuery
 
          return SE_ERROR;
       }
+
+      printf("\tquid = %d\n", (*questions)[i]->questionId);
+      puts("");
    }
 
    // null the terminating array member
-   (*questions)[numQuestions + 1] = NULL;
+   (*questions)[numQuestions] = NULL;
 
    // free the json
    json_decref(root);
@@ -259,10 +265,33 @@ SEError SEFindQuestions(SEQuestion*** questions, char* humanQueryString, SEQuery
    return SE_OK;
 }
 
-// TODO fill this in
+void SEFreeQuestionWithAnswers(SEQuestion* question) {
+   if(!question) {
+      return;
+   }
+
+   // freeing this json node frees all strings for this question
+   // and each of its answers
+   json_decref(question->jsonLocalRoot);
+}
+
 void SEFreeQuestions(SEQuestion*** questions) {
-   // free all allocated strings inside each one?
-   // free all the answer objects entirely
-   // free the questions array itself
+   if(!questions) {
+      // not sure if this is an error or not, so don't report it
+      return;
+   }
+
+   SEQuestion** curq;
+   for(curq = *questions; *curq; curq++) {
+      // free the answers themselves
+      free((*curq)->answers);
+
+      // free the contents of the question object and all
+      // strings in its answers
+      SEFreeQuestionWithAnswers(*curq);
+   }
+
+   // free the questions pointer array itself
+   free(*questions);
 }
 

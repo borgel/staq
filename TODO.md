@@ -1,5 +1,4 @@
 # MVP
-- SEQuestion free fxn
 - SEFreeQuery
 - push pointer into SEQuestion type itself (need to make struct non-anon?)? Makes the API not so nasty. Could also typedef over it
 - UI
