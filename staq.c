@@ -66,18 +66,29 @@ int main(int argc, char* argv[]) {
 
    free(queryString);
 
+   // FIXME rm bunch of random test code
    printf("M addr? %p\n", questions);
    printf("M* addr? %p\n", *questions);
    printf("M q0 id = %d\n", questions[0]->questionId);
    printf("M q0a0 id = %d\n", questions[0]->answers[0].answerId);
    puts("");
+   printf("question 0's answers\n");
+   SEAnswer* cura;
+   for(int i = 0; i < questions[0]->answerCount; i++) {
+      cura = &questions[0]->answers[i];
+      printf("\tid %d\n", cura->answerId);
+   }
+   puts("");
 
    SEQuestion** curq;
+   SEQuestion* q;
    for(curq = questions; *curq; curq++) {
-      printf("q %p\n", *curq);
+      q = *curq;
+      //printf("q %p\n", q);
+      printf("Question %d\n", q->questionId);
+      //printf("\t%s\n", q->body);
    }
 
-   //TODO for each question. print it, then print each answer
 
    // TODO draw GUI and display results
 

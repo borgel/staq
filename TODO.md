@@ -1,11 +1,12 @@
 # MVP
-- push pointer into SEQuestion type itself (need to make struct non-anon?)? Makes the API not so nasty. Could also typedef over it
 - UI
    - Allow user to select question threads from search results to view
    - Display question and answers, sorted by rating
    - Highlight accepted answer
 - Remove either body or body_markdown from API filter
 - full help msg
+- remove random printing in main/stackexchange/etc
+- check all TODOs/FIXMEs/XXXs
 
 # Near Future
 - User config .file
