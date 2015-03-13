@@ -97,6 +97,13 @@ static SEError SEPopulateQuestion(SEQuestion* question, json_t* json) {
       return SE_JSON_ERROR;
    }
 
+   // if it hasn't been answered, there will be no 'answers' object in the
+   // JSON
+   if(question->answerCount == 0) {
+      question->answers = NULL;
+      return SE_OK;
+   }
+
    json_t* janswers = json_object_get(json, "answers");
    if(!janswers) {
       fprintf(stderr, "error: couldn't get question's answer items\n");
