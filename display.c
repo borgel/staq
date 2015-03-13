@@ -14,13 +14,36 @@
 
 static int g_initialized = 0;
 
-// populate the answer panel
-static void PopluateAnswers(SEAnswer* answers) {
+// populate the answer panel from this question
+static void PopulateAnswers(WINDOW* window, SEQuestion* question) {
    /*
     * how?
     * manually scrolling stream of panels?
     * menu of some sort?
     */
+
+   // clear out any existing contents
+   wclear(window);
+
+   if(question->answerCount == 0) {
+      wprintw(window, "No answers to this question\n");
+      return;
+   }
+
+   wprintw(window, "starting answers pw\n");
+   for(int i = 0; i < question->answerCount; i++) {
+      SEAnswer* a = &question->answers[i];
+
+      // TODO style these
+      // TODO checkmark for accepted
+      wprintw(window, "Score %d - #%d\n", a->score, a->answerId);
+      //wprintw(window, "%s\n", a->bodyMarkdown);
+      wprintw(window, "%s\n", a->body);
+
+      // horizontal divider between questions
+      // TODO set color
+      whline(window, 0, COLS);
+   }
 }
 
 DispError DoDisplay(SEQuestion** questions, int numQuestions) {
@@ -45,7 +68,15 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
       //fprintf(stderr, "reallocing for %d questions, size %lu\n", i, i * sizeof(ITEM*));
       //TODO stringify score?, MUST hold onto pointer so curses can use it later
       questionItems[i] = new_item(q->title, "");
+
+      // store a pointer to the question this relates to
+      set_item_userptr(questionItems[i], q);
    }
+
+   // TODO colors The functions set_menu_fore() and set_menu_back() can be
+   // used to change the attribute of the selected item and unselected item.
+   // The names are misleading. They don't change menu's foreground or
+   // background which would have been useless.
 
    MENU* menuQuestions = new_menu(questionItems);
    WINDOW *my_menu_win;
@@ -72,6 +103,12 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
 
    //TODO open 2 panels with menus (questions, and answer stream)
 
+   // answers pad
+   // lines, cols
+   WINDOW* padAnswers = newpad(LINES, 100);
+   //WINDOW* padAnswers = subpad(stdscr, LINES, 100, 0, COLS / 2);
+   //box(padAnswers, 0, 0);
+
    //TODO print questions in q panel
 
    // start with the questions selected
@@ -80,11 +117,12 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
    // input handling loop
    int c;
    int flag = 0;
+   ITEM* itemSelected;
    do {
       c = wgetch(stdscr);
       switch(c)
       {
-         // TODO make scroll work in active panel
+         // movement
          case 'j':
          case KEY_DOWN:
             menu_driver(focusedMenu, REQ_DOWN_ITEM);
@@ -100,6 +138,32 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
             menu_driver(focusedMenu, REQ_SCR_UPAGE);
             break;
 
+         case 'g':
+            menu_driver(focusedMenu, REQ_FIRST_ITEM);
+            break;
+         case 'G':
+            menu_driver(focusedMenu, REQ_LAST_ITEM);
+            break;
+
+         case KEY_ENTER:
+         case 10:
+            // populate answer panel based on the selected question
+
+            itemSelected = current_item(focusedMenu);
+            //p = item_userptr(cur);
+            //p((char *)item_name(cur));
+            PopulateAnswers(padAnswers, (SEQuestion*)item_userptr(itemSelected));
+            pos_menu_cursor(focusedMenu);
+
+            //touchwin(stdscr);
+            // int prefresh(WINDOW *pad, int pminrow, int pmincol,
+            //              int sminrow, int smincol, int smaxrow, int smaxcol);
+            //prefresh(padAnswers, 0, 0, 0, 0, LINES, 100);
+            prefresh(padAnswers, 0, 0,
+                  0, 100, LINES, COLS);
+
+            break;
+
          // ways to quit
          case 'q':
             flag = 1;
@@ -108,7 +172,7 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
          default:
             break;
       }
-      refresh();
+      //refresh();
    } while(!flag);
 
    fprintf(stderr, "done with display\n");

@@ -11,7 +11,11 @@
 - remove random printing in main/stackexchange/etc
 - check all TODOs/FIXMEs/XXXs
 
+
 # Near Future
+- Switch to bring UI colors like TIG
+- redo question UI panel so it isnt a list of titles
+   - want blurbs of each question body
 - get more then 1 page of results from SE
    - user config? default #?
 - support more vi page controls
