@@ -94,15 +94,17 @@ typedef struct {
 /**
  * query for all questions with answers pertaining to the users query.
  * Takes:
- *    pointer to array of pointers to filled questions to receive
- *    pointer to error type (can be null)
+ *    pointer to array of pointers to filled questions to receive. this will be
+ *       NULL terminated
+ *    optional pointer to an int to store the number of questions returned in.
+ *       can be NULL. This will be set to -1 on error.
  *    query string
  * Returns:
  *    SE_OK on no error
  *    Error status otherwise
  */
-SEError SEEasyFindQuestions(SEQuestion*** questions, char* query);
-SEError SEFindQuestions(SEQuestion*** questions, char* query, SEQueryOptions* seqo);
+SEError SEEasyFindQuestions(SEQuestion*** questions, int* numFoundQuestions, char* query);
+SEError SEFindQuestions(SEQuestion*** questions, int* numFoundQuestions, char* query, SEQueryOptions* seqo);
 
 /**
  * Free an array of questions

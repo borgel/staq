@@ -179,17 +179,21 @@ static SEError SEQueryAdvanced(json_t** json, SEStructuredQuery* query, SEQueryO
 }
 
 
-SEError SEEasyFindQuestions(SEQuestion*** questions, char* query) {
-   return SEFindQuestions(questions, query, NULL);
+SEError SEEasyFindQuestions(SEQuestion*** questions, int* numFoundQuestions, char* query) {
+   return SEFindQuestions(questions, numFoundQuestions, query, NULL);
 }
 
-SEError SEFindQuestions(SEQuestion*** questions, char* humanQueryString, SEQueryOptions* seqo) {
+SEError SEFindQuestions(SEQuestion*** questions, int* numFoundQuestions, char* humanQueryString, SEQueryOptions* seqo) {
    SEError res;
    SEStructuredQuery stq;
    json_t* root = NULL;
 
    if(!humanQueryString) {
       return SE_BAD_PARAM;
+   }
+
+   if(numFoundQuestions) {
+      *numFoundQuestions = -1;
    }
 
    // build the query
@@ -261,6 +265,10 @@ SEError SEFindQuestions(SEQuestion*** questions, char* humanQueryString, SEQuery
 
    // free the json
    json_decref(root);
+
+   if(numFoundQuestions) {
+      *numFoundQuestions = numQuestions;
+   }
 
    return SE_OK;
 }

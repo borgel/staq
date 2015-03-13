@@ -52,19 +52,26 @@ int main(int argc, char* argv[]) {
    }
    printf("total line [%s]\n", queryString);
 
-   // setup our stack exchange lib
-   SEInit();
-
    // run the query, as specifid by the user
+   int numQuestions;
    SEQuestion** questions = NULL;
-   err = SEEasyFindQuestions(&questions, queryString);
+   err = SEEasyFindQuestions(&questions, &numQuestions, queryString);
    if(err != SE_OK) {
-      //error, compare to SEError enum
-      fprintf(stderr, "Query failed. Code %d\n", err);
-      //exit(-1);
+      fprintf(stderr, "Query failed: ");
+      if(err == SE_CURL_ERROR) {
+         fprintf(stderr, "Do you have a network connection?\n");
+      }
+      else {
+         fprintf(stderr, "Code %d\n", err);
+      }
+
+
+      goto cleanup;
    }
 
    free(queryString);
+
+   printf("was told there were %d questions\n", numQuestions);
 
    // FIXME rm bunch of random test code
    printf("M addr? %p\n", questions);
