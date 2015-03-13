@@ -12,14 +12,19 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <curses.h>
+
+#include "display.h"
 #include "stackexchange.h"
 
-#define USAGE  "Usage: staq [-h] <a query to search for>"
+#define MSG_USAGE          "Usage: staq [-h] <a query to search for>"
+#define MSG_IN_PROGRESS    "Getting Questions/Answers"
 
 int main(int argc, char* argv[]) {
    SEError err;
 
-   puts("Start");
+   // setup the stack exchange lib
+   SEInit();
 
    // run getopt until it finishes, then take whatever's left as
    // if its the user's query string and cat it together
@@ -28,8 +33,9 @@ int main(int argc, char* argv[]) {
       switch(c) {
          case 'h':
          default:
-            printf(USAGE "\n");
-            exit(0);
+            printf(MSG_USAGE "\n");
+
+            goto cleanup;
       }
    }
 
@@ -38,9 +44,11 @@ int main(int argc, char* argv[]) {
    argv += optind;
 
    if(argc <= 0) {
-      printf(USAGE "\n");
-      exit(0);
+      printf(MSG_USAGE "\n");
+      goto cleanup;
    }
+
+   printf(MSG_IN_PROGRESS "\n");
 
    // glom together everything left in argv to be the user's query string
    char* queryString = malloc(strlen(argv[1]));
@@ -87,6 +95,7 @@ int main(int argc, char* argv[]) {
    }
    puts("");
 
+   /*
    SEQuestion** curq;
    SEQuestion* q;
    for(curq = questions; *curq; curq++) {
@@ -95,10 +104,25 @@ int main(int argc, char* argv[]) {
       printf("Question %d\n", q->questionId);
       //printf("\t%s\n", q->body);
    }
+   */
 
+   // setup the display stuff
+   // FIXME should this be at the top? that breaks normal printing if we dont use stderr
 
-   // TODO draw GUI and display results
+   //FIXME rm
+   sleep(2);
 
+   DisplayInit();
+
+   // draw GUI and display results
+   DispError derr;
+   derr = DoDisplay(questions, numQuestions);
+   if(derr != DISP_OK) {
+      printf("Display error. Code %d\n", derr);
+   }
+
+cleanup:
+   DisplayCleanup();
    SEFreeQuestions(&questions);
    SECleanup();
    return 0;

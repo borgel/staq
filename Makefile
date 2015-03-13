@@ -1,10 +1,10 @@
 CC= gcc
 CFLAGS= -g -Wall
-LIBS = -lcurl -lncurses -ljansson
+LIBS = -lcurl -lncurses -lmenu -ljansson
 
 all: staq
 
-staq: staq.o stackexchange.o se_query_builder.o
+staq: staq.o stackexchange.o display.o se_query_builder.o
 	$(CC) $(LIBS) $^ -o $@
 
 .c.o:

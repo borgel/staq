@@ -1,21 +1,27 @@
 # MVP
+- let user scroll and select in question panel menu
+- when user selects a question, switch to answer panel and populate it with answers
 - UI
    - Allow user to select question threads from search results to view
    - Display question and answers, sorted by rating
    - Highlight accepted answer
-- Remove either body or body_markdown from API filter
+- Remove either body or body_markdown from API filter to save bits
+- sort answers (accepted, then votes)
 - full help msg
 - remove random printing in main/stackexchange/etc
 - check all TODOs/FIXMEs/XXXs
 
 # Near Future
+- get more then 1 page of results from SE
+   - user config? default #?
 - User config .file
    - Make it JSON so we can reuse the parser
    - Optional API/application key
    - Default sites to search
 - Select other Stack Exchange sites
+- Separate SE query from UI. Draw UI immediately while beginning to make API requests
 - Search multiple Stack Exchange sites
-- Render pretty questions/answers
+- Render prettier questions/answers
 - Search query params
    - Sorting?
 - Show more SE metadata (user ratings, etc)
