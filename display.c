@@ -67,7 +67,7 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
    refresh();
 
    // unicode checkmark?
-   mvaddstr(1, 0, "\xe2\x9c\x93");
+   //mvaddstr(10, 10, "\xe2\x9c\x93");
 
    //TODO open 2 panels with menus (questions, and answer stream)
 
@@ -84,9 +84,11 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
       switch(c)
       {
          // TODO make scroll work in active panel
+         case 'j':
          case KEY_DOWN:
             menu_driver(focusedMenu, REQ_DOWN_ITEM);
             break;
+         case 'k':
          case KEY_UP:
             menu_driver(focusedMenu, REQ_UP_ITEM);
             break;

@@ -14,6 +14,8 @@
 # Near Future
 - get more then 1 page of results from SE
    - user config? default #?
+- support more vi page controls
+- support SIGWINCH events (rescale UI)
 - User config .file
    - Make it JSON so we can reuse the parser
    - Optional API/application key
