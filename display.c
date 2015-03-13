@@ -4,6 +4,8 @@
 #include <curses.h>
 #include <menu.h>
 
+#include <locale.h>
+
 #include "display.h"
 
 #define DCOLOR_NORMAL       1
@@ -60,14 +62,13 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
    set_menu_format(menuQuestions, maxHeight, 1);
 
    set_menu_mark(menuQuestions, ">");
+   // unicode check mark selector
+   //set_menu_mark(menuQuestions, "\xe2\x9c\x93");
 
    //box(my_menu_win, 0, 0);
    post_menu(menuQuestions);
    wrefresh(my_menu_win);
    refresh();
-
-   // unicode checkmark?
-   //mvaddstr(10, 10, "\xe2\x9c\x93");
 
    //TODO open 2 panels with menus (questions, and answer stream)
 
@@ -120,6 +121,9 @@ DispError DisplayInit() {
    if(g_initialized) {
       return DISP_ERROR;
    }
+
+   // get us to a place where we'll display Unicode
+   setlocale(LC_CTYPE, "");
 
    // curses init
    initscr();
