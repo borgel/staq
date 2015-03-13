@@ -1,7 +1,8 @@
 # staq
-A Stack Exchange question/answer browser for a comandline world.
+A Stack Exchange question/answer browser for a commandline world.
 
 # Usage
+To search for "c ncurses window splitting" do this:
 ```
 staq c ncurses window splitting
 ```
