@@ -1,6 +1,6 @@
 CC= gcc
 CFLAGS= -g -Wall
-LIBS = -lcurl -lncurses -lmenu -ljansson
+LIBS = -lcurl -lpanel -lmenu -lncurses -ljansson
 
 all: staq
 

@@ -3,6 +3,7 @@
 
 #include <curses.h>
 #include <menu.h>
+#include <panel.h>
 
 #include <locale.h>
 
@@ -12,7 +13,16 @@
 #define DCOLOR_H1           2
 #define DCOLOR_ALERT        3
 
+#define WIDTH_THIRD        (COLS / 3)
+
 static int g_initialized = 0;
+
+// yep, this module is using globals for now. Sorry 'bout that
+static WINDOW* windowQuestions;
+static WINDOW* windowAnswers;
+
+static PANEL* panelQuestions;
+static PANEL* panelAnswers;
 
 // populate the answer panel from this question
 static void PopulateAnswers(WINDOW* window, SEQuestion* question) {
@@ -40,32 +50,21 @@ static void PopulateAnswers(WINDOW* window, SEQuestion* question) {
       //wprintw(window, "%s\n", a->bodyMarkdown);
       wprintw(window, "%s\n", a->body);
 
-      // horizontal divider between questions
+      // horizontal divider between questions?
       // TODO set color
-      whline(window, 0, COLS);
+      //whline(window, 0, COLS);
    }
 }
 
-DispError DoDisplay(SEQuestion** questions, int numQuestions) {
-   //printw("starting display\n");
-   if(!g_initialized) {
-      return DISP_NOT_INIT;
-   }
-   if(!questions || !*questions) {
-      return DISP_BAD_PARAM;
-   }
-
-   // uhh, does this have to be null terminated? thats the example
+// bundle together setup stuff for questions
+static void InitQuestionsWindow(MENU** menuQuestionsPtr, SEQuestion** questions, int numQuestions){
+   // does this have to be null terminated? thats the example
    ITEM** questionItems = (ITEM**)calloc(numQuestions + 1, sizeof(ITEM*));
 
    SEQuestion* q;
    for(int i = 0; i < numQuestions; i++) {
       q = questions[i];
 
-      //FIXME test code rm this
-      //printw("Question %d\n", q->questionId);
-
-      //fprintf(stderr, "reallocing for %d questions, size %lu\n", i, i * sizeof(ITEM*));
       //TODO stringify score?, MUST hold onto pointer so curses can use it later
       questionItems[i] = new_item(q->title, "");
 
@@ -78,100 +77,167 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
    // The names are misleading. They don't change menu's foreground or
    // background which would have been useless.
 
-   MENU* menuQuestions = new_menu(questionItems);
-   WINDOW *my_menu_win;
+   *menuQuestionsPtr = new_menu(questionItems);
+   MENU* menuQuestions = *menuQuestionsPtr;
 
    // get height of window to get max lines to show
-   int maxHeight = (LINES > numQuestions) ? numQuestions : LINES;
+   int maxX, maxY;
+   getmaxyx(windowQuestions, maxY, maxX);
+   int maxHeight = (maxY > numQuestions) ? numQuestions : maxY;
 
-   //my_menu_win = newwin(10, 40, 4, 4);
-   my_menu_win = stdscr;
-   keypad(my_menu_win, TRUE);
-
-   set_menu_win(menuQuestions, my_menu_win);
-   //set_menu_sub(menuQuestions, derwin(my_menu_win, 6, 38, 3, 1));
+   set_menu_win(menuQuestions, windowQuestions);
+   // set the menu in a subwindow, leaving room for a border
+   set_menu_sub(menuQuestions, derwin(windowQuestions, maxY - 1, maxX - 1, 1, 1));
    set_menu_format(menuQuestions, maxHeight, 1);
 
    set_menu_mark(menuQuestions, ">");
    // unicode check mark selector
    //set_menu_mark(menuQuestions, "\xe2\x9c\x93");
 
-   //box(my_menu_win, 0, 0);
    post_menu(menuQuestions);
-   wrefresh(my_menu_win);
-   refresh();
+   //wrefresh(my_menu_win);
+   //refresh();
+}
 
-   //TODO open 2 panels with menus (questions, and answer stream)
+DispError DoDisplay(SEQuestion** questions, int numQuestions) {
+   //printw("starting display\n");
+   if(!g_initialized) {
+      return DISP_NOT_INIT;
+   }
+   if(!questions || !*questions) {
+      return DISP_BAD_PARAM;
+   }
 
-   // answers pad
-   // lines, cols
-   WINDOW* padAnswers = newpad(LINES, 100);
-   //WINDOW* padAnswers = subpad(stdscr, LINES, 100, 0, COLS / 2);
+   MENU* menuQuestions = NULL;
+   InitQuestionsWindow(&menuQuestions, questions, numQuestions);
+
+   //WINDOW* padAnswers = newpad(LINES, 100);
+   // FIXME total size needs to enough for all answers? what if we hit the end?
+   int maxX, maxY;
+   getmaxyx(windowQuestions, maxY, maxX);
+   WINDOW* padAnswers = subpad(derwin(windowAnswers, maxY - 1, maxX - 1, 1, 1), LINES, 100, 0, 0);
    //box(padAnswers, 0, 0);
 
-   //TODO print questions in q panel
 
-   // start with the questions selected
-   MENU* focusedMenu = menuQuestions;
+   // final refresh before we run forever
+   update_panels();
+   doupdate();
 
    // input handling loop
    int c;
    int flag = 0;
+   int answersTop = 0;
+   int questionsFocused = 1;
    ITEM* itemSelected;
    do {
       c = wgetch(stdscr);
-      switch(c)
-      {
-         // movement
-         case 'j':
-         case KEY_DOWN:
-            menu_driver(focusedMenu, REQ_DOWN_ITEM);
-            break;
-         case 'k':
-         case KEY_UP:
-            menu_driver(focusedMenu, REQ_UP_ITEM);
-            break;
-         case KEY_NPAGE:
-            menu_driver(focusedMenu, REQ_SCR_DPAGE);
-            break;
-         case KEY_PPAGE:
-            menu_driver(focusedMenu, REQ_SCR_UPAGE);
-            break;
 
-         case 'g':
-            menu_driver(focusedMenu, REQ_FIRST_ITEM);
-            break;
-         case 'G':
-            menu_driver(focusedMenu, REQ_LAST_ITEM);
-            break;
+      // take different actions depending on which panel is focused
+      if(questionsFocused) {
+         // operate questions menu
+         switch(c)
+         {
+            // movement
+            case 'j':
+            case KEY_DOWN:
+               menu_driver(menuQuestions, REQ_DOWN_ITEM);
+               break;
+            case 'k':
+            case KEY_UP:
+               menu_driver(menuQuestions, REQ_UP_ITEM);
+               break;
+            case KEY_NPAGE:
+               menu_driver(menuQuestions, REQ_SCR_DPAGE);
+               break;
+            case KEY_PPAGE:
+               menu_driver(menuQuestions, REQ_SCR_UPAGE);
+               break;
 
-         case KEY_ENTER:
-         case 10:
-            // populate answer panel based on the selected question
+            case 'g':
+               menu_driver(menuQuestions, REQ_FIRST_ITEM);
+               break;
+            case 'G':
+               menu_driver(menuQuestions, REQ_LAST_ITEM);
+               break;
 
-            itemSelected = current_item(focusedMenu);
-            //p = item_userptr(cur);
-            //p((char *)item_name(cur));
-            PopulateAnswers(padAnswers, (SEQuestion*)item_userptr(itemSelected));
-            pos_menu_cursor(focusedMenu);
+            case KEY_ENTER:
+            case 10:
+               questionsFocused = 0;
+               show_panel(panelAnswers);
 
-            //touchwin(stdscr);
-            // int prefresh(WINDOW *pad, int pminrow, int pmincol,
-            //              int sminrow, int smincol, int smaxrow, int smaxcol);
-            //prefresh(padAnswers, 0, 0, 0, 0, LINES, 100);
-            prefresh(padAnswers, 0, 0,
-                  0, 100, LINES, COLS);
+               // populate answer panel based on the selected question
+               itemSelected = current_item(menuQuestions);
+               //PopulateAnswers(windowAnswers, (SEQuestion*)item_userptr(itemSelected));
+               PopulateAnswers(padAnswers, (SEQuestion*)item_userptr(itemSelected));
+               pos_menu_cursor(menuQuestions);
 
-            break;
+               // reset the position counter
+               answersTop = 0;
 
-         // ways to quit
-         case 'q':
-            flag = 1;
-            break;
+               //touchwin(windowAnswers);
+               // int prefresh(WINDOW *pad, int pminrow, int pmincol,
+               //              int sminrow, int smincol, int smaxrow, int smaxcol);
+               //prefresh(padAnswers, 0, 0, 0, 0, LINES, 100);
+               prefresh(padAnswers, 0, 0,
+                     0, 0, LINES, COLS);
 
-         default:
-            break;
+               break;
+
+            // ways to quit
+            case 'q':
+               flag = 1;
+               break;
+
+            default:
+               break;
+         }
       }
+      else {
+         // operate answers pad
+         switch(c)
+         {
+            // movement
+            case 'j':
+            case KEY_DOWN:
+               answersTop++;
+               break;
+
+            case 'k':
+            case KEY_UP:
+               answersTop = (answersTop - 1 < 0) ? answersTop : answersTop - 1;
+               break;
+
+            case KEY_NPAGE:
+               break;
+            case KEY_PPAGE:
+               break;
+
+            case 'g':
+               break;
+            case 'G':
+               break;
+
+            // ways to quit
+            case 'q':
+               show_panel(panelQuestions);
+               questionsFocused = 1;
+               break;
+
+            default:
+               break;
+         }
+         prefresh(padAnswers, answersTop, 0, 0, 0, LINES, COLS);
+
+         //wprintw(windowAnswers, "answers top = %d\n", answersTop);
+         wprintw(padAnswers, "answers top = %d\n", answersTop);
+      }
+
+      // Update the stacking order. 2nd panel will be on top
+      update_panels();
+
+      // Show it on the screen
+      doupdate();
+
       //refresh();
    } while(!flag);
 
@@ -201,6 +267,35 @@ DispError DisplayInit() {
    init_pair(DCOLOR_H1, COLOR_CYAN, COLOR_BLACK);
    init_pair(DCOLOR_ALERT, COLOR_RED, COLOR_BLACK);
 
+   // init stuff
+   // full height, 2/3 of screen
+   windowQuestions = newwin(LINES, 2 * WIDTH_THIRD, 0, 0);
+   windowAnswers = newwin(LINES, 2 * WIDTH_THIRD, 0, WIDTH_THIRD);
+
+   keypad(windowQuestions, TRUE);
+   keypad(windowAnswers, TRUE);
+
+   // not sure we want this
+   //scrollok(windowAnswers, TRUE);
+
+   // build panels too
+   panelQuestions = new_panel(windowQuestions);
+   panelAnswers = new_panel(windowAnswers);
+
+   // bring the question panel to the top
+   show_panel(panelQuestions);
+
+   // FIXME do this here?
+   box(windowQuestions, 0, 0);
+   box(windowAnswers, 0, 0);
+
+   // Update the stacking order. 2nd panel will be on top
+   update_panels();
+
+   // Show it on the screen
+   doupdate();
+
+
    g_initialized = 1;
 
    return DISP_OK;
@@ -213,7 +308,6 @@ DispError DisplayCleanup() {
 
    g_initialized = 0;
 
-   // TODO curses teardown? or does that happen after DoDisplay?
    endwin();
 
    return DISP_OK;
