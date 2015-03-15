@@ -26,6 +26,30 @@ void SECleanup() {
 }
 
 /**
+ * Sorting function for stdlib qsort
+ */
+// qsort(void *base, size_t nel, size_t width, int (*compar)(const void *, const void *));
+// The comparison function must return an integer less than, equal to, or
+// greater than zero if the first argument is considered to be respectively
+// less than, equal to, or greater than the second.
+static int CompareSEAnswer(const void* a, const void* b) {
+   SEAnswer* qa = (SEAnswer*)a;
+   SEAnswer* qb = (SEAnswer*)b;
+
+   if(!qa || !qb) {
+      return 0;
+   }
+
+   if(qa->score < qb->score) {
+      return 1;
+   }
+   else if (qa->score > qb->score) {
+      return -1;
+   }
+   return 0;
+}
+
+/**
  * Assemble a single answer from its JSON
  */
 static SEError SEPopulateAnswer(SEAnswer* answer, json_t* json) {
@@ -124,6 +148,9 @@ static SEError SEPopulateQuestion(SEQuestion* question, json_t* json) {
          return SE_ERROR;
       }
    }
+
+   // sort the answers based on rating
+   qsort(question->answers, numAnswers, sizeof(SEAnswer), CompareSEAnswer);
 
    return SE_OK;
 }
