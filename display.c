@@ -9,15 +9,20 @@
 
 #include "display.h"
 
-#define DCOLOR_NORMAL       1
-#define DCOLOR_H1           2
-#define DCOLOR_ALERT        3
+#define DCOLOR_NORMAL         1
+#define DCOLOR_H1             2
+#define DCOLOR_ALERT          3
 
-#define SCREEN_WIDTH_THIRD (COLS / 3)
+#define SCREEN_WIDTH_THIRD    (COLS / 3)
 // asking windows for their bounds when they are not at the
 // top of the panel stack gives you the current bounds, not
 // their top-of-the-stack bounds
-#define WIN_FULL_WIDTH     (2 * SCREEN_WIDTH_THIRD)
+#define WIN_FULL_WIDTH        (2 * SCREEN_WIDTH_THIRD)
+
+#define WIN_HEIGHT_BORDERS    (LINES - 2)
+
+// this is crap
+#define ANSWER_PAD_MAX_LINES  999
 
 static int g_initialized = 0;
 
@@ -84,12 +89,11 @@ static void InitQuestionsWindow(MENU** menuQuestionsPtr, SEQuestion** questions,
    // get height of window to get max lines to show
    int maxX, maxY;
    getmaxyx(windowQuestions, maxY, maxX);
-   int maxHeight = (maxY > numQuestions) ? numQuestions : maxY;
 
    set_menu_win(menuQuestions, windowQuestions);
    // set the menu in a subwindow, leaving room for a border
    set_menu_sub(menuQuestions, derwin(windowQuestions, maxY - 1, maxX - 1, 1, 1));
-   set_menu_format(menuQuestions, maxHeight - 2, 1);
+   set_menu_format(menuQuestions, WIN_HEIGHT_BORDERS, 1);
 
    set_menu_mark(menuQuestions, ">");
    // unicode check mark selector
@@ -118,7 +122,7 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
 
    // these coords are where we will draw the pad. but we don't need a window
    // FIXME #lines? there is a max content length
-   WINDOW* padAnswersContent = newpad(999, WIN_FULL_WIDTH - 2);
+   WINDOW* padAnswersContent = newpad(ANSWER_PAD_MAX_LINES, WIN_FULL_WIDTH - 2);
 
    // final refresh before we run forever
    update_panels();
@@ -203,10 +207,10 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
 
             case KEY_NPAGE:
                //FIXME pagesize macro?
-               answersTop += (LINES - 2);
+               answersTop += WIN_HEIGHT_BORDERS;
                break;
             case KEY_PPAGE:
-               answersTop -= (LINES - 2);
+               answersTop -= WIN_HEIGHT_BORDERS;
                answersTop = (answersTop < 0) ? 0 : answersTop;
                break;
 
@@ -216,7 +220,7 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
 
             case 'G':
                // not sure how to easily find the bottom row of text
-               answersTop = 999 - (LINES - 2);
+               answersTop = ANSWER_PAD_MAX_LINES- WIN_HEIGHT_BORDERS;
                break;
 
             // ways to quit
@@ -237,7 +241,7 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
       if(!questionsFocused) {
          // draw the answers pad, if it should be shown
          prefresh(padAnswersContent, answersTop, 0,
-               minY, minX, LINES - 2, COLS - 2);
+               minY, minX, WIN_HEIGHT_BORDERS, COLS - 2);
       }
 
       // Show it on the screen

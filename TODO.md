@@ -1,5 +1,4 @@
 # MVP
-- make sure menu scrolling works
 - wrap window/panel stuff in a special struct to bundle together
    - window and panel pointers
    - true original width/height
@@ -11,14 +10,10 @@
    - remove \n\r's and replace with curses move operations?
    - remove html tags?
 - any reason to use waddstr? instear of wprint?
-- UI
-   - Allow user to select question threads from search results to view
-   - Display question and answers, sorted by rating
-   - Highlight accepted answer
-- Remove either body or body_markdown from API filter to save bits
+- Highlight accepted answer
+- Remove either body or body_markdown from API filter to save bits on the wire
 - sort answers (accepted, then votes)
 - full help msg
-- remove random printing in main/stackexchange/etc
 - check all TODOs/FIXMEs/XXXs
 
 
@@ -32,7 +27,6 @@
    - want blurbs of each question body
 - get more then 1 page of results from SE
    - user config? default #?
-- support more vi page controls
 - support SIGWINCH events (rescale UI)
 - User config .file
    - Make it JSON so we can reuse the parser
