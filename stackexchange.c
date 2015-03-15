@@ -40,6 +40,11 @@ static int CompareSEAnswer(const void* a, const void* b) {
       return 0;
    }
 
+   // force accepted answers to sort to the top
+   if(qb->isAccepted) {
+      return 1;
+   }
+
    if(qa->score < qb->score) {
       return 1;
    }

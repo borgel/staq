@@ -1,4 +1,5 @@
 # MVP
+- tweak answer qsort fxn to always report an accepted answer as higher
 - wrap window/panel stuff in a special struct to bundle together
    - window and panel pointers
    - true original width/height
@@ -6,15 +7,15 @@
    - pad?
    - current scroll position (lets you return to where you left off)
    - desired current viewport?
-- special fxns for printing question bodies?
-   - remove \n\r's and replace with curses move operations?
-   - remove html tags?
-- any reason to use waddstr? instear of wprint?
-- Highlight accepted answer
+- render markdown by integrating https://github.com/zielmicha/markdown-to-terminal
+   - add color/style
+      - dividers and title bars in printed output
+      - Highlight accepted answer
 - Remove either body or body_markdown from API filter to save bits on the wire
-- sort answers (accepted, then votes)
+- any reason to use waddstr? instear of wprint?
 - full help msg
 - check all TODOs/FIXMEs/XXXs
+
 
 
 # Near Future
@@ -27,7 +28,9 @@
    - want blurbs of each question body
 - get more then 1 page of results from SE
    - user config? default #?
-- support SIGWINCH events (rescale UI)
+   - open UI immediately
+   - request a small page first and post it to the UI for the user
+   - as new pages come in, append them to the avalible questions list in the ui
 - User config .file
    - Make it JSON so we can reuse the parser
    - Optional API/application key
@@ -42,6 +45,9 @@
 - Allow more SE stuff
    - User lookup
    - Tag browsing
+- support SIGWINCH events (rescale UI)
+- properly request gzipped content from SE https://api.stackexchange.com/docs/compression
+- detect when we get decompressed content (can curl do this?) and dont error (do we now?)
 
 # Far Future
 - Offline SE

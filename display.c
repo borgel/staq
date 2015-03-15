@@ -45,13 +45,20 @@ static void PopulateAnswers(WINDOW* window, SEQuestion* question) {
 
    // print the question
    wprintw(window, "%d - %s\n", question->score, question->title);
-   wprintw(window, "%s\n", question->bodyMarkdown);
+   wprintw(window, "%s\n", question->body);
 
    for(int i = 0; i < question->answerCount; i++) {
       SEAnswer* a = &question->answers[i];
 
       // TODO style these
       // TODO checkmark for accepted
+      wprintw(window, "\n\n");
+
+      // if an answer is accepted, put a check mark by it
+      if(a->isAccepted) {
+         waddstr(window, "\xe2\x9c\x93 ");
+      }
+
       wprintw(window, "Score %d - #%d\n", a->score, a->answerId);
       //wprintw(window, "%s\n", a->bodyMarkdown);
       wprintw(window, "%s\n", a->body);
