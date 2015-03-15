@@ -16,9 +16,13 @@
 #define API_PARAM_SITE           "site="
 #define SITE_STACKOVERFLOW       "stackoverflow"
 #define API_PARAM_FILTER         "filter="
-#define DEFAULT_FILTER           "!)5cCAwGtW9nSs24.zZQuaru1fQ7m"
+#define API_PARAM_PAGE_SIZE      "pagesize="
+#define DEFAULT_PAGE_SIZE        "50"
 
-#define DEFAULT_SEARCH_STR       API_BASE API_SEARCH DEFAULT_ORDER "&" DEFAULT_SORT "&" API_PARAM_SEARCH_QUERY "%s" "&" API_PARAM_SITE SITE_STACKOVERFLOW "&" API_PARAM_FILTER DEFAULT_FILTER
+//#define DEFAULT_FILTER           "!)5cCAwGtW9nSs24.zZQuaru1fQ7m"
+#define DEFAULT_FILTER           "!)5cCAwGtW9nSs24.zZQuarx.JCsH"
+
+#define DEFAULT_SEARCH_STR       API_BASE API_SEARCH DEFAULT_ORDER "&" DEFAULT_SORT "&" API_PARAM_PAGE_SIZE DEFAULT_PAGE_SIZE "&" API_PARAM_SEARCH_QUERY "%s" "&" API_PARAM_SITE SITE_STACKOVERFLOW "&" API_PARAM_FILTER DEFAULT_FILTER
 
 /**
  * There's some ineffeciencies in here in the number of allocations and the

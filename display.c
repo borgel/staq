@@ -45,7 +45,7 @@ static void PopulateAnswers(WINDOW* window, SEQuestion* question) {
 
    // print the question
    wprintw(window, "%d - %s\n", question->score, question->title);
-   wprintw(window, "%s\n", question->body);
+   wprintw(window, "%s\n", question->bodyMarkdown);
 
    for(int i = 0; i < question->answerCount; i++) {
       SEAnswer* a = &question->answers[i];
