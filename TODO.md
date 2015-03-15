@@ -1,10 +1,12 @@
 # MVP
-- break questions init into fxn
-- break UI into 2 panels. draw each appropriately, and switch focus back and forth
+- TODO: WAS WORKING ON: I think the subpad stuff is broken. is my derwin ok?
 - make each panel scroll if its selected
 - when user selects a question, switch to answer panel and populate it with answers
-- put question at top of answer panel
 - DO NOT select quesions as the user pages through them? how to we switch focus to the other window?
+- special fxns for printing question bodies?
+   - remove \n\r's and replace with curses move operations?
+   - remove html tags?
+- any reason to use waddstr? instear of wprint?
 - UI
    - Allow user to select question threads from search results to view
    - Display question and answers, sorted by rating
