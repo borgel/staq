@@ -58,7 +58,9 @@ int main(int argc, char* argv[]) {
       queryString = strcat(queryString, argv[i]);
       queryString = strcat(queryString, " ");
    }
-   printf("total line [%s]\n", queryString);
+
+   //squash the trailing space
+   queryString[strlen(queryString) - 1] = '\0';
 
    // run the query, as specifid by the user
    int numQuestions;
@@ -79,39 +81,8 @@ int main(int argc, char* argv[]) {
 
    free(queryString);
 
-   printf("was told there were %d questions\n", numQuestions);
-
-   // FIXME rm bunch of random test code
-   printf("M addr? %p\n", questions);
-   printf("M* addr? %p\n", *questions);
-   printf("M q0 id = %d\n", questions[0]->questionId);
-   printf("M q0a0 id = %d\n", questions[0]->answers[0].answerId);
-   puts("");
-   printf("question 0's answers\n");
-   SEAnswer* cura;
-   for(int i = 0; i < questions[0]->answerCount; i++) {
-      cura = &questions[0]->answers[i];
-      printf("\tid %d\n", cura->answerId);
-   }
-   puts("");
-
-   /*
-   SEQuestion** curq;
-   SEQuestion* q;
-   for(curq = questions; *curq; curq++) {
-      q = *curq;
-      //printf("q %p\n", q);
-      printf("Question %d\n", q->questionId);
-      //printf("\t%s\n", q->body);
-   }
-   */
-
-   // setup the display stuff
+   // setup the curses display stuff
    // FIXME should this be at the top? that breaks normal printing if we dont use stderr
-
-   //FIXME rm
-   sleep(2);
-
    DisplayInit();
 
    // draw GUI and display results

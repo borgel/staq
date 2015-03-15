@@ -220,10 +220,7 @@ SEError SEFindQuestions(SEQuestion*** questions, int* numFoundQuestions, char* h
       return SE_ERROR;
    }
 
-   puts("converting json to our structs");
-
    // TODO break the basic validation out?
-
    // do some json validation
    if(!json_is_object(root)) {
       fprintf(stderr, "error: root is not an object\n");
@@ -239,10 +236,7 @@ SEError SEFindQuestions(SEQuestion*** questions, int* numFoundQuestions, char* h
       return SE_JSON_ERROR;
    }
 
-   puts("before loop");
-
    int numQuestions = json_array_size(jquestions);
-   printf("%d questions\n", numQuestions);
    // allocate an extra slot for the terminator
    *questions = (SEQuestion**)malloc(1 + numQuestions * sizeof(SEQuestion*));
 
@@ -252,9 +246,6 @@ SEError SEFindQuestions(SEQuestion*** questions, int* numFoundQuestions, char* h
 
       (*questions)[i] = calloc(1, sizeof(SEQuestion));
 
-      printf("p = %p\n", (*questions)[i]);
-      printf("assigned question %d/%d\n", i, numQuestions);
-
       // fill in this question object (including all its answers)
       if(SEPopulateQuestion((*questions)[i], jcur) != SE_OK) {
          fprintf(stderr, "error: populating question %d\n", i);
@@ -262,9 +253,6 @@ SEError SEFindQuestions(SEQuestion*** questions, int* numFoundQuestions, char* h
 
          return SE_ERROR;
       }
-
-      printf("\tquid = %d\n", (*questions)[i]->questionId);
-      puts("");
    }
 
    // null the terminating array member

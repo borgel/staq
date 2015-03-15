@@ -30,12 +30,6 @@ static PANEL* panelAnswers;
 
 // populate the answer panel from this question
 static void PopulateAnswers(WINDOW* window, SEQuestion* question) {
-   /*
-    * how?
-    * manually scrolling stream of panels?
-    * menu of some sort?
-    */
-
    // clear out any existing contents
    wclear(window);
 
@@ -48,7 +42,6 @@ static void PopulateAnswers(WINDOW* window, SEQuestion* question) {
    wprintw(window, "%d - %s\n", question->score, question->title);
    wprintw(window, "%s\n", question->body);
 
-   wprintw(window, "starting answers pw\n");
    for(int i = 0; i < question->answerCount; i++) {
       SEAnswer* a = &question->answers[i];
 
@@ -103,12 +96,9 @@ static void InitQuestionsWindow(MENU** menuQuestionsPtr, SEQuestion** questions,
    //set_menu_mark(menuQuestions, "\xe2\x9c\x93");
 
    post_menu(menuQuestions);
-   //wrefresh(my_menu_win);
-   //refresh();
 }
 
 DispError DoDisplay(SEQuestion** questions, int numQuestions) {
-   //printw("starting display\n");
    if(!g_initialized) {
       return DISP_NOT_INIT;
    }
@@ -127,16 +117,8 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
    minY++;
 
    // these coords are where we will draw the pad. but we don't need a window
-   // WINDOW* windowAnswersInner = derwin(windowAnswers, maxY - 2, maxX - 2, 1, 1);
-
-   //WINDOW* padAnswers = subpad(derwin(windowAnswers, maxY - 1, maxX - 1, 1, 1), LINES, 100, 0, 0);
-   //WINDOW* padAnswers = subpad(windowAnswersInner, LINES, 100, 0, 0);
-
    // FIXME #lines? there is a max content length
    WINDOW* padAnswersContent = newpad(999, WIN_FULL_WIDTH - 2);
-
-   //wprintw(windowQuestions, "pad content vport @ %p\n", padAnswersContent);
-   //wprintw(windowQuestions, "pad answers vport @ %p\n", padAnswersViewport);
 
    // final refresh before we run forever
    update_panels();
@@ -298,7 +280,7 @@ DispError DisplayInit() {
    keypad(windowQuestions, TRUE);
    keypad(windowAnswers, TRUE);
 
-   // not sure we want this
+   // not sure we want this. the menu itself handles scroll
    //scrollok(windowAnswers, TRUE);
 
    // build panels too

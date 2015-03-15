@@ -1,8 +1,5 @@
 # MVP
 - make sure menu scrolling works
-- make each panel scroll if its selected
-- when user selects a question, switch to answer panel and populate it with answers
-- DO NOT select quesions as the user pages through them? how to we switch focus to the other window?
 - wrap window/panel stuff in a special struct to bundle together
    - window and panel pointers
    - true original width/height
@@ -26,9 +23,11 @@
 
 
 # Near Future
+- standardize error printing in stackexchange to use fprintf(stderr)
 - use curl progress callbacks and curses to have a progress indicator (bar, or spinner, or total #)
    - pass callback after SEInit that calls into the display module to display progress
-- Switch to bring UI colors like TIG
+- show (and 1/2 cover) question content as the user scrolls through questions?
+- Switch to bright UI colors like TIG
 - redo question UI panel so it isnt a list of titles
    - want blurbs of each question body
 - get more then 1 page of results from SE
