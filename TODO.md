@@ -1,8 +1,15 @@
 # MVP
-- TODO: WAS WORKING ON: I think the subpad stuff is broken. is my derwin ok?
+- make sure menu scrolling works
 - make each panel scroll if its selected
 - when user selects a question, switch to answer panel and populate it with answers
 - DO NOT select quesions as the user pages through them? how to we switch focus to the other window?
+- wrap window/panel stuff in a special struct to bundle together
+   - window and panel pointers
+   - true original width/height
+   - menu?
+   - pad?
+   - current scroll position (lets you return to where you left off)
+   - desired current viewport?
 - special fxns for printing question bodies?
    - remove \n\r's and replace with curses move operations?
    - remove html tags?

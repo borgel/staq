@@ -13,7 +13,11 @@
 #define DCOLOR_H1           2
 #define DCOLOR_ALERT        3
 
-#define WIDTH_THIRD        (COLS / 3)
+#define SCREEN_WIDTH_THIRD (COLS / 3)
+// asking windows for their bounds when they are not at the
+// top of the panel stack gives you the current bounds, not
+// their top-of-the-stack bounds
+#define WIN_FULL_WIDTH     (2 * SCREEN_WIDTH_THIRD)
 
 static int g_initialized = 0;
 
@@ -115,13 +119,12 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
    MENU* menuQuestions = NULL;
    InitQuestionsWindow(&menuQuestions, questions, numQuestions);
 
-   //WINDOW* padAnswers = newpad(LINES, 100);
-   // FIXME total size needs to enough for all answers? what if we hit the end?
-   int maxX, maxY;
-   getmaxyx(windowAnswers, maxY, maxX);
-
    int minX, minY;
    getbegyx(windowAnswers, minY, minX);
+
+   // protect the borders
+   minX++;
+   minY++;
 
    // these coords are where we will draw the pad. but we don't need a window
    // WINDOW* windowAnswersInner = derwin(windowAnswers, maxY - 2, maxX - 2, 1, 1);
@@ -129,15 +132,8 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
    //WINDOW* padAnswers = subpad(derwin(windowAnswers, maxY - 1, maxX - 1, 1, 1), LINES, 100, 0, 0);
    //WINDOW* padAnswers = subpad(windowAnswersInner, LINES, 100, 0, 0);
 
-   // ugh, ok so here goes. there is a pad that holds all the
-   // content, and a pad that acts as a movable window to
-   // display a subset of it
-   // FIXME maxX? also, #lines? there is a max content length
-   WINDOW* padAnswersContent = newpad(999, maxX);
-   // the viewport size is the max size of the inside of
-   // windowAnswers
-   WINDOW* padAnswersViewport = subpad(padAnswersContent,
-         maxY - 2, maxX - 2, 0, 0);
+   // FIXME #lines? there is a max content length
+   WINDOW* padAnswersContent = newpad(999, WIN_FULL_WIDTH - 2);
 
    //wprintw(windowQuestions, "pad content vport @ %p\n", padAnswersContent);
    //wprintw(windowQuestions, "pad answers vport @ %p\n", padAnswersViewport);
@@ -191,18 +187,11 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
 
                // populate answer panel based on the selected question
                itemSelected = current_item(menuQuestions);
-               //PopulateAnswers(windowAnswersInner, (SEQuestion*)item_userptr(itemSelected));
                PopulateAnswers(padAnswersContent, (SEQuestion*)item_userptr(itemSelected));
                pos_menu_cursor(menuQuestions);
 
-               // reset the position counter
+               // reset the text position counter
                answersTop = 0;
-
-               //touchwin(windowAnswers);
-               // int prefresh(WINDOW *pad, int pminrow, int pmincol,
-               //              int sminrow, int smincol, int smaxrow, int smaxcol);
-               //prefresh(padAnswers, 0, 0, 0, 0, LINES, 100);
-               //prefresh(padAnswers, 0, 0, 0, 0, LINES, COLS);
 
                break;
 
@@ -231,13 +220,21 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
                break;
 
             case KEY_NPAGE:
+               //FIXME pagesize macro?
+               answersTop += (LINES - 2);
                break;
             case KEY_PPAGE:
+               answersTop -= (LINES - 2);
+               answersTop = (answersTop < 0) ? 0 : answersTop;
                break;
 
             case 'g':
+               answersTop = 0;
                break;
+
             case 'G':
+               // not sure how to easily find the bottom row of text
+               answersTop = 999 - (LINES - 2);
                break;
 
             // ways to quit
@@ -250,39 +247,16 @@ DispError DoDisplay(SEQuestion** questions, int numQuestions) {
             default:
                break;
          }
-
-         // draw the answers pad
-         //int prefresh(WINDOW *pad, int pminrow, int pmincol,
-         //       int sminrow, int smincol, int smaxrow, int smaxcol);
-         //prefresh(padAnswers, answersTop, 0, 0, 0, LINES, COLS);
-         //prefresh(padAnswers, answersTop, 0,
-         //       0, WIDTH_THIRD * 2, LINES, COLS);
-         //prefresh(padAnswers, answersTop, 0, answersTop, 0, LINES, COLS);
-
-         // pad, top y/x of conent to display, top left of screen, bottom right of screen (relative to screen start coords)
-         // all are row, col
-         //pnoutrefresh(padAnswers, 0, 0, 0, 200, 50, 50);
-         touchwin(padAnswersContent);
-         int res;
-         res = pnoutrefresh(padAnswersViewport, answersTop, 0,
-               minY, minX, maxY, maxX);
-         //int res = pnoutrefresh(padAnswersViewport, 0, 0, 0, 0, 50, 50);
-
-         wprintw(windowQuestions, " Code %d\n", res);
-         wprintw(windowQuestions, "min (x %d, y %d)\n", minX, minY);
-         wprintw(windowQuestions, "max (x %d, y %d)\n", maxX, maxY);
       }
-
-      //wprintw(windowAnswers, "answers top = %d\n", answersTop);
 
       // Update the panel stacking order
       update_panels();
 
-      // FIXME needed?
-      wnoutrefresh(stdscr);
-
-
-      //wprintw(windowQuestions, "top left src (x %d, y %d)\n", COLS-maxX, LINES-maxY);
+      if(!questionsFocused) {
+         // draw the answers pad, if it should be shown
+         prefresh(padAnswersContent, answersTop, 0,
+               minY, minX, LINES - 2, COLS - 2);
+      }
 
       // Show it on the screen
       doupdate();
@@ -317,9 +291,9 @@ DispError DisplayInit() {
    init_pair(DCOLOR_ALERT, COLOR_RED, COLOR_BLACK);
 
    // init stuff
-   // full height, 2/3 of screen
-   windowQuestions = newwin(LINES, 2 * WIDTH_THIRD, 0, 0);
-   windowAnswers = newwin(LINES, 2 * WIDTH_THIRD, 0, WIDTH_THIRD);
+   // each full height, 2/3 of screen
+   windowQuestions = newwin(LINES, WIN_FULL_WIDTH, 0, 0);
+   windowAnswers = newwin(LINES, WIN_FULL_WIDTH, 0, SCREEN_WIDTH_THIRD);
 
    keypad(windowQuestions, TRUE);
    keypad(windowAnswers, TRUE);
