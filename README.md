@@ -1,13 +1,13 @@
 # staq
 A Stack Exchange question/answer browser for a commandline world.
 
-# Usage
+## Usage
 To search for "c ncurses window splitting" do this:
 ```
 staq c ncurses window splitting
 ```
 
-# Why?
+## Why?
 When programming, often I use two tools:
 - My terminal
 - A browser, open to Stack Overflow to solve problems
@@ -16,15 +16,15 @@ It would be ideal to fulfull both of these purposes using a purely console-based
 
 Inspired by `tig`, an excellent git log browser.
 
-# Installation
+## Installation
 You will need...
 - libcurl
 - jansson (a C JSON lib)
 
-# Comments
+## Comments
 The Stack Exchange interface code is written to be more or less standalone, so it could be easily integrated into other projects. The curses display code... not so much. Ultimately I decided it was application-specific enough to not bother generalizing.
 
-## Some Sample Stack Exchange Queries
+### Some Sample Stack Exchange Queries
 
 'c string concatenation', sorted by descending relevance. Filter showing body and body in markdown of all questions.
 ```
