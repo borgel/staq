@@ -1,5 +1,8 @@
 # MVP
-- tweak answer qsort fxn to always report an accepted answer as higher
+- render markdown by integrating https://github.com/zielmicha/markdown-to-terminal
+   - add color/style
+      - dividers and title bars in printed output
+      - Highlight accepted answer
 - wrap window/panel stuff in a special struct to bundle together
    - window and panel pointers
    - true original width/height
@@ -7,19 +10,18 @@
    - pad?
    - current scroll position (lets you return to where you left off)
    - desired current viewport?
-- render markdown by integrating https://github.com/zielmicha/markdown-to-terminal
-   - add color/style
-      - dividers and title bars in printed output
-      - Highlight accepted answer
 - Remove either body or body_markdown from API filter to save bits on the wire
-- any reason to use waddstr? instear of wprint?
-- full help msg
+- full help msg for -h?
 - check all TODOs/FIXMEs/XXXs
 
 
 
 # Near Future
-- standardize error printing in stackexchange to use fprintf(stderr)
+- switch to waddstr? instear of wprint? is there a benefit?
+- Status bar in main window (for loading, progress, controls, etc)
+   - callback to print in it too
+- support 'h' for help (in status bar?)
+- standardize error printing in stackexchange.c to use fprintf(stderr)
 - use curl progress callbacks and curses to have a progress indicator (bar, or spinner, or total #)
    - pass callback after SEInit that calls into the display module to display progress
 - show (and 1/2 cover) question content as the user scrolls through questions?

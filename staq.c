@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 
 #include <curses.h>
 
@@ -19,6 +20,13 @@
 
 #define MSG_USAGE          "Usage: staq [-h] <a query to search for>"
 #define MSG_IN_PROGRESS    "Getting Questions/Answers"
+
+static void GracefulEscape(int signal) {
+   DisplayCleanup();
+   SECleanup();
+
+   exit(0);
+}
 
 int main(int argc, char* argv[]) {
    SEError err;
@@ -47,6 +55,9 @@ int main(int argc, char* argv[]) {
       printf(MSG_USAGE "\n");
       goto cleanup;
    }
+
+   // install a signal handler to gracefully exit on ctrl-c
+   signal(SIGTERM, GracefulEscape);
 
    printf(MSG_IN_PROGRESS "\n");
 
@@ -89,10 +100,12 @@ int main(int argc, char* argv[]) {
    DispError derr;
    derr = DoDisplay(questions, numQuestions);
    if(derr != DISP_OK) {
-      printf("Display error. Code %d\n", derr);
+      fprintf(stderr, "Display error. Code %d\n", derr);
    }
 
 cleanup:
+   fprintf(stderr, "starting cleanup\n");
+
    DisplayCleanup();
    SEFreeQuestions(&questions);
    SECleanup();
