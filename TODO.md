@@ -1,5 +1,5 @@
 # MVP
-- render markdown by integrating https://github.com/zielmicha/markdown-to-terminal
+- render markdown by integrating libsoldout (see its readme)
    - add color/style
       - dividers and title bars in printed output
       - Highlight accepted answer
@@ -17,6 +17,7 @@
 
 
 # Near Future
+- Fix libsoldout target specification
 - switch to waddstr? instear of wprint? is there a benefit?
 - Status bar in main window (for loading, progress, controls, etc)
    - callback to print in it too
