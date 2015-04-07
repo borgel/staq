@@ -7,6 +7,7 @@
 
 #include <locale.h>
 
+#include "renderMarkdown.h"
 #include "display.h"
 
 #define DCOLOR_NORMAL         1
@@ -51,7 +52,6 @@ static void PopulateAnswers(WINDOW* window, SEQuestion* question) {
       SEAnswer* a = &question->answers[i];
 
       // TODO style these
-      // TODO checkmark for accepted
       wprintw(window, "\n\n");
 
       // if an answer is accepted, put a check mark by it
@@ -60,8 +60,12 @@ static void PopulateAnswers(WINDOW* window, SEQuestion* question) {
       }
 
       wprintw(window, "Score %d - #%d\n", a->score, a->answerId);
+
       //wprintw(window, "%s\n", a->bodyMarkdown);
       wprintw(window, "%s\n", a->body);
+
+      // TODO render markdown properly
+      RenderMarkdown(window, a->bodyMarkdown);
 
       // horizontal divider between questions?
       // TODO set color
