@@ -15,11 +15,17 @@
 
 #include <curses.h>
 
+#include <getopt.h>
+
 #include "display.h"
 #include "stackexchange.h"
 
 #define MSG_USAGE          "Usage: staq [-h] <a query to search for>"
 #define MSG_IN_PROGRESS    "Getting Questions/Answers"
+
+// hooks for getopt
+extern char *optarg;
+extern int optind, opterr, optopt;
 
 static void GracefulEscape(int signal) {
    DisplayCleanup();
